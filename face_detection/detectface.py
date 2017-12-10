@@ -46,6 +46,10 @@ while True:
         roi_gray = imgray[y:y+h, x:x+w]
         roi_color = im[y:y+h, x:x+w]
         roi_resized = imresize(roi_color,(96,96))
+        # perform histogram equalization:
+        roi_ycc = cv2.cvtColor(roi_resized, cv2.COLOR_BGR2YCR_CB)
+        roi_ycc[:,:,0] = cv2.equalizeHist(roi_ycc[:,:,0])
+        roi_resized = cv2.cvtColor(roi_ycc, cv2.COLOR_YCR_CB2BGR)
 
         # prep image for pytorch:
         face = torch.from_numpy(roi_resized.transpose(2,0,1))
@@ -69,7 +73,7 @@ while True:
     i += 1
     if i >= 30:
         # send get requests for anyone whose face was detected in more than half of the last 30 frames:
-        present_names = [name for name, numhits in hits.items() if numhits > 15]
+        present_names = [name for name, numhits in hits.items() if numhits > 10]
         print hits
         print "------------------------"
         for name in present_names:

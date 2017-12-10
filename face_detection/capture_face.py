@@ -39,10 +39,15 @@ for i in range(1000):
         continue
     x,y,w,h = faces[0]
 
+    # crop face:
     im = cv2.rectangle(im,(x,y),(x+w,y+h),(255,0,0),2)
-    roi_gray = imgray[y:y+h, x:x+w]
     roi_color = im[y:y+h, x:x+w]
     roi_resized = imresize(roi_color,(96,96))
+    # perform histogram equalization:
+    roi_ycc = cv2.cvtColor(roi_resized, cv2.COLOR_BGR2YCR_CB)
+    roi_ycc[:,:,0] = cv2.equalizeHist(roi_ycc[:,:,0])
+    roi_resized = cv2.cvtColor(roi_ycc, cv2.COLOR_YCR_CB2BGR)
+
 
     # prep image for pytorch:
     face = torch.from_numpy(roi_resized.transpose(2,0,1))
